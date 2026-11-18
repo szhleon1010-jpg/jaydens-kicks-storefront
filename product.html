@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f7f3">
+<meta name="description" content="Explore Jayden’s custom sneaker designs, choose your size, and build an order request.">
+<title>Jayden’s Kicks — Wear Something Different</title>
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script><script src="upgrade.js" defer></script>
+</head>
+<body id="top">
+<header class="shell"><a class="logo" href="#top">Jayden’s<span>KICKS STUDIO</span></a><nav aria-label="Main"><a href="#collection">Collection</a><a href="#process">How it works</a></nav><button class="bag" data-bag>Bag <span id="count">0</span></button></header>
+<main class="shell"></main>
+<footer class="shell"><a class="logo" href="#top">Jayden’s<span>KICKS STUDIO</span></a><p>Independent custom sneaker studio</p><a href="#top">Back to top ↑</a></footer>
+<dialog id="custom" aria-labelledby="design-title"><div class="dialog-head"><p class="tag">CUSTOMIZE YOUR PAIR</p><button type="button" data-close aria-label="Close">×</button></div><h2 id="design-title"></h2><p id="design-info"></p><form id="custom-form"><label>Size (US men’s)<select name="size" required><option value="">Choose your size</option></select></label><label>Color<select name="color"></select></label><label>Customization notes <small>(optional)</small><textarea name="notes" maxlength="300" rows="3" placeholder="Tell Jayden what you have in mind"></textarea></label><button class="button">Add to bag <span id="design-price"></span></button></form></dialog>
+<dialog id="checkout" aria-labelledby="bag-title"><div class="dialog-head"><p class="tag">ORDER REQUEST</p><button type="button" data-close aria-label="Close">×</button></div><h2 id="bag-title">Your bag<span>.</span></h2><div id="items"></div><form id="order-form"><div class="subtotal"><b>Estimated subtotal</b><strong id="total"></strong></div><p class="fine">Final pricing, shipping, and availability are subject to confirmation.</p><label>Preferred payment method<select name="payment" required><option value="">Choose a method</option><option>Card via secure payment link</option><option>PayPal invoice</option></select></label><p class="notice">Preview checkout: save a copy of your request. No order is sent and no payment is taken.</p><button class="button">Download order request <span>↓</span></button><p id="order-status" role="status"></p></form></dialog>
+<p class="toast" id="toast" role="status" hidden></p>
+</body>
+</html>
+
