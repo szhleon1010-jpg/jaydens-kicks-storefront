@@ -72,20 +72,17 @@ function renderBag(){
 }
 $('[data-bag]').onclick = () => {renderBag();checkout.showModal();};
 document.querySelectorAll('[data-close]').forEach(button => button.onclick = () => button.closest('dialog').close());
-order.addEventListener('submit',event => {
+order.addEventListener('submit', async event => {
   event.preventDefault();
-  if(!bag.length) return;
-  const lines = ['JAYDEN’S KICKS — ORDER REQUEST','','Draft only. This request has not been sent or paid.','',...bag.map((item,i) => {
-    const design = catalog[item.design];
-    return [i+1 + '. ' + design.title + ' — ' + money(design.price),'US men’s size ' + item.size,'Color: ' + item.color,item.notes && 'Notes: ' + item.notes].filter(Boolean).join('\n');
-  }),'','Estimated subtotal: ' + $('#total').textContent,'Preferred payment method: ' + order.elements.payment.value,'Availability, final pricing, and shipping to be confirmed.'];
-  const url = URL.createObjectURL(new Blob([lines.join('\n\n')],{type:'text/plain;charset=utf-8'}));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'jaydens-kicks-order-request.txt';
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url),1000);
-  $('#order-status').textContent = 'Order request downloaded. No payment was taken.';
+  if (!bag.length) return;
+  const result = await submitForm(order, $('#order-status'), 'orders',
+    {...Object.fromEntries(new FormData(order)), items:bag},
+    'Demo order placed. Payment simulated. No money was charged');
+  if (result) {
+    bag = [];
+    save();
+    $('#items').textContent = 'Your demonstration order was received.';
+    order.querySelector('button.button').hidden = true;
+  }
 });
 save();
-

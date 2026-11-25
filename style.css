@@ -68,3 +68,12 @@ input,select,textarea{min-height:44px}
   .fields{grid-template-columns:minmax(0,1fr)}
   .card-body{padding:14px}
 }
+
+.trust-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;padding:22px 0;margin-bottom:24px;border-bottom:1px solid var(--line)}
+.trust-info strong{font-size:1rem}
+.trust-info p{font-size:1rem;color:var(--muted);margin-top:6px}
+@media(max-width:600px){.trust-info{grid-template-columns:1fr}}
+.demo-banner{margin:0;padding:10px 16px;background:#202c65;color:white;text-align:center;font-size:.875rem}
+fieldset{border:1px solid var(--line);border-radius:8px;display:grid;gap:12px;padding:14px;min-width:0}
+legend{font-weight:750}
+button:disabled{opacity:.65;cursor:wait}

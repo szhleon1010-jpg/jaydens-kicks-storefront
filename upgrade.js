@@ -46,71 +46,50 @@ document.addEventListener('DOMContentLoaded', () => {
         <form id="request-form"><div class="fields"><label>Name<input name="name" autocomplete="name" required maxlength="80"></label><label>Email<input name="email" type="email" autocomplete="email" required maxlength="120"></label></div>
         <div class="fields"><label>US men’s size<select name="size" required>${configuration.elements.size.innerHTML}</select></label><label>Preferred colors<input name="colors" required maxlength="100"></label></div>
         <label>Design idea<textarea name="idea" rows="4" required maxlength="700"></textarea></label><label>Needed by (optional)<input name="date" type="date"></label>
-        <p class="fine">Download a draft to share with Jayden. Online submission requires a studio contact destination.</p>
-        <button class="button">Download custom request ↓</button><p role="status" id="request-status"></p></form></section>
+        <p class="fine">Demonstration only. Use sample contact details. Your request will be saved to this website.</p>
+        <button class="button">Submit custom request</button><p role="status" id="request-status"></p></form></section>
       <section class="studio-panel" id="reviews"><div><h2>Customer reviews<span>.</span></h2><div id="review-list"></div></div>
         <form id="review-form"><label>Display name<input name="name" maxlength="60" required></label>
         <div class="fields"><label>Design<select name="design" required>${Object.entries(catalog).map(([id, design]) => '<option value="' + id + '">' + design.title + '</option>').join('')}</select></label>
         <label>Rating<select name="rating" required><option value="">Choose a rating</option><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label></div>
-        <label>Your review<textarea name="review" rows="3" maxlength="500" required></textarea></label><p class="fine">Reviews are saved on this device.</p>
-        <button class="button">Save review</button><p role="status" id="review-status"></p></form></section>`);
-    document.querySelector('#request-form').onsubmit = event => {
+        <label>Your review<textarea name="review" rows="3" maxlength="500" required></textarea></label><p class="fine">Reviews are public. Use a display name and leave out personal information.</p>
+        <button class="button">Post review</button><p role="status" id="review-status"></p></form></section>`);
+    document.querySelector('#request-form').onsubmit = async event => {
       event.preventDefault();
-      const data = Object.fromEntries(new FormData(event.currentTarget));
-      const draft = ['Jayden’s Kicks custom request', 'Name: ' + data.name, 'Email: ' + data.email,
-        'US men’s size: ' + data.size, 'Preferred colors: ' + data.colors, 'Design: ' + data.idea,
-        'Needed by: ' + (data.date || 'Flexible')].join('\n');
-      const url = URL.createObjectURL(new Blob([draft], {type:'text/plain;charset=utf-8'}));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'jaydens-kicks-custom-request.txt';
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      document.querySelector('#request-status').textContent = 'Your draft is ready to share.';
+      const form = event.currentTarget;
+      await submitForm(form, document.querySelector('#request-status'), 'requests',
+        Object.fromEntries(new FormData(form)), 'Custom request received. This is a demonstration');
     };
-    document.querySelector('#review-form').onsubmit = event => {
+    document.querySelector('#review-form').onsubmit = async event => {
       event.preventDefault();
-      const status = document.querySelector('#review-status');
-      const review = Object.fromEntries(new FormData(event.currentTarget));
-      review.name = review.name.trim();
-      review.review = review.review.trim();
-      if (!review.name || !review.review) {
-        status.textContent = 'Enter your name and review.';
-        return;
-      }
-      try {
-        localStorage.setItem(reviewKey, JSON.stringify([review, ...readReviews()]));
-      } catch {
-        status.textContent = 'Your browser could not save this review.';
-        return;
-      }
-      event.currentTarget.reset();
-      status.textContent = 'Review saved on this device.';
-      renderReviews();
+      const form = event.currentTarget;
+      const result = await submitForm(form, document.querySelector('#review-status'), 'reviews',
+        Object.fromEntries(new FormData(form)), 'Review published');
+      if (result) renderReviews();
     };
   }
-  const reviewKey = 'jaydens-kicks-reviews-v1';
-  function readReviews() {
-    try {
-      const reviews = JSON.parse(localStorage.getItem(reviewKey) || '[]');
-      return Array.isArray(reviews) ? reviews.filter(review => review && Object.hasOwn(catalog, review.design)) : [];
-    } catch { return []; }
-  }
-  function renderReviews() {
+  async function renderReviews() {
     const list = document.querySelector('#review-list');
-    const reviews = readReviews().filter(review => !detail || review.design === designId);
-    list.replaceChildren();
-    if (!reviews.length) list.textContent = 'No reviews saved on this device yet.';
-    for (const review of reviews) {
-      const article = document.createElement('article');
-      const author = document.createElement('strong');
-      const body = document.createElement('p');
-      author.textContent = review.name + ' · ' + review.rating + '/5 · ' + catalog[review.design].title;
-      body.textContent = review.review;
-      article.append(author, body);
-      list.append(article);
+    list.textContent = 'Loading reviews…';
+    try {
+      const response = await fetch('/api/submissions?kind=reviews');
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      const reviews = data.reviews.filter(review => Object.hasOwn(catalog, review.design) && (!detail || review.design === designId));
+      list.replaceChildren();
+      if (!reviews.length) list.textContent = 'Be the first to review a design.';
+      for (const review of reviews) {
+        const article = document.createElement('article');
+        const author = document.createElement('strong');
+        const body = document.createElement('p');
+        author.textContent = review.name + ' · ' + review.rating + '/5 · ' + catalog[review.design].title;
+        body.textContent = review.review;
+        article.append(author, body);
+        list.append(article);
+      }
+    } catch {
+      list.textContent = 'Reviews are temporarily unavailable. Please refresh to try again.';
     }
   }
   renderReviews();
 });
-
